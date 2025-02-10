@@ -1,7 +1,8 @@
 **Assignment Link: https://github.com/saastechacademy/foundation/blob/main/udm/intermediate/sql-assignment/sql-assignment-1.md**
 
 **Query 1:**
-*/
+
+```
 SELECT 
     pr.party_id, 
     pr.first_name, 
@@ -19,7 +20,8 @@ WHERE
     (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NULL)
     AND prl.role_type_id = 'CUSTOMER'
     AND p.created_date BETWEEN '2023-06-01 00:00:00' AND '2023-06-30 23:59:59';
-/*
+```
+    
 **Output:**
 
 ![image](https://github.com/user-attachments/assets/f9f8d1b1-2014-43ac-b047-34d440cde592)
@@ -29,7 +31,7 @@ WHERE
 
 **Query 2:**
 **a:**
-
+```
 select distinct
 	p.product_id,
 	p.product_type_id,
@@ -37,6 +39,7 @@ select distinct
 from inventory_item i
 left join product p
 on i.product_id=p.product_id;
+```
 
 **Output:**
 
@@ -45,6 +48,7 @@ on i.product_id=p.product_id;
 
 **b:**
 
+```
 select distinct
 	p.product_id,
 	p.product_type_id,
@@ -55,6 +59,7 @@ on i.product_id=p.product_id
 inner join product_type pt
 on p.product_type_id=pt.product_type_id
 where pt.is_physical='Y';
+```
 
 **Output:**
 
@@ -65,6 +70,7 @@ where pt.is_physical='Y';
 
 **Query 3:**
 
+```
 select distinct
 	p.product_id,
 	p.internal_name,
@@ -75,6 +81,7 @@ left join product p
 on gi.product_id=p.product_id
 where gi.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
 and gi.ID_VALUE is null;
+```
 
 **Output:**
 
@@ -85,6 +92,7 @@ and gi.ID_VALUE is null;
 
 **Query 4:**
 
+```
 SELECT 
     gi.product_id, 
     (CASE WHEN gi.GOOD_IDENTIFICATION_TYPE_ID = 'SHOPIFY_PROD_ID' THEN gi.id_value END) AS shopify_id, 
@@ -93,6 +101,7 @@ SELECT
 FROM good_identification gi 
     WHERE gi.GOOD_IDENTIFICATION_TYPE_ID IN ('SHOPIFY_PROD_ID', 'HC_GOOD_ID_TYPE', 'ERP_ID')
 GROUP BY gi.product_id;
+```
 
 **Output:**
 
@@ -114,6 +123,7 @@ GROUP BY gi.product_id;
 
 **Query 7:**
 
+```
 SELECT
 	o.order_id,
     o.grand_total as Total_amount,
@@ -125,6 +135,7 @@ left join order_payment_preference op
 on o.order_id=op.order_id
 order by o.order_date DESC
 limit 500;
+```
 
 **Output:**
 
@@ -135,6 +146,7 @@ limit 500;
 
 **Query 8:**
 
+```
 SELECT 
     o.order_id, 
     o.status_id as order_status, 
@@ -146,6 +158,7 @@ LEFT JOIN shipment s ON o.order_id = s.primary_order_id
 WHERE 
     p.status_id <> 'PAYMENT_RECEIVED'
     AND s.status_id <> 'SHIPPED';
+```
 
 **Output:**
 
@@ -156,6 +169,7 @@ WHERE
 
 Query9:
 
+```
 SELECT
 	count(o.order_id),
 	hour(o.order_date)
@@ -163,6 +177,7 @@ from order_header o
 where o.order_date between '2024-10-28 00:00:01' and '2024-10-28 23:59:59'
 and o.status_id = 'ORDER_COMPLETED'
 group by hour(o.order_date);
+```
 
 **Output:**
 
@@ -178,6 +193,7 @@ Query10:
 
 Query11:
 
+```
 select
 	count(o.order_id),
     os.CHANGE_REASON_ENUM_ID
@@ -186,6 +202,7 @@ inner join order_status os
 on o.order_id=os.order_id
 where o.order_date between '2024-12-01 00:00:01' and '2024-12-31 23:59:59'
 and o.status_id = 'ORDER_CANCELLED' and CHANGE_REASON_ENUM_ID is not null;
+```
 
 **Output:**
 
@@ -198,11 +215,5 @@ Query12:
 //tbd
 
 -----------------------------------------------------------------------
-
-
-
-
-
-
 
 
