@@ -83,7 +83,7 @@ and gi.ID_VALUE is null;
 
 -----------------------------------------------------------------------
 
-**Query4:**
+**Query 4:**
 
 SELECT 
     gi.product_id, 
@@ -102,17 +102,17 @@ GROUP BY gi.product_id;
 ----------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------
 
-Query5:
+**Query 5:**
 //tbd
 
 -----------------------------------------------------------------------
 
-Query6:
-//does not exist
+//Query 6 not mentioned in doc
 
------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
 
-Query7:
+**Query 7:**
 
 SELECT
 	o.order_id,
@@ -126,9 +126,14 @@ on o.order_id=op.order_id
 order by o.order_date DESC
 limit 500;
 
+**Output:**
+
+![image](https://github.com/user-attachments/assets/df111c19-eab0-43d6-a356-cee7a0e2be3c)
+
+
 -----------------------------------------------------------------------
 
-Query8:
+**Query 8:**
 
 SELECT 
     o.order_id, 
@@ -142,6 +147,11 @@ WHERE
     p.status_id <> 'PAYMENT_RECEIVED'
     AND s.status_id <> 'SHIPPED';
 
+**Output:**
+
+![image](https://github.com/user-attachments/assets/18dcf1a4-98de-4fc6-914a-46ab34e9e7ab)
+
+
 -----------------------------------------------------------------------
 
 Query9:
@@ -153,6 +163,11 @@ from order_header o
 where o.order_date between '2024-10-28 00:00:01' and '2024-10-28 23:59:59'
 and o.status_id = 'ORDER_COMPLETED'
 group by hour(o.order_date);
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/ba76ed67-0f18-41ca-9ef1-e278566e9c8c)
+
 
 -----------------------------------------------------------------------
 
@@ -171,6 +186,11 @@ inner join order_status os
 on o.order_id=os.order_id
 where o.order_date between '2024-12-01 00:00:01' and '2024-12-31 23:59:59'
 and o.status_id = 'ORDER_CANCELLED' and CHANGE_REASON_ENUM_ID is not null;
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/7cd8dea3-44e7-4efa-aa5b-51bfcb6ebae2)
+
 
 -----------------------------------------------------------------------
 
