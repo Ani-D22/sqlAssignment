@@ -1,7 +1,7 @@
 **Assignment Link: https://github.com/saastechacademy/foundation/blob/main/udm/intermediate/sql-assignment/sql-assignment-1.md**
 
 **Query 1:**
-/*
+*/
 SELECT 
     pr.party_id, 
     pr.first_name, 
@@ -19,7 +19,7 @@ WHERE
     (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NULL)
     AND prl.role_type_id = 'CUSTOMER'
     AND p.created_date BETWEEN '2023-06-01 00:00:00' AND '2023-06-30 23:59:59';
-*/
+/*
 **Output:**
 
 ![image](https://github.com/user-attachments/assets/f9f8d1b1-2014-43ac-b047-34d440cde592)
