@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/8fc28667-d6e6-48fb-b9fc-d2b71516d0b6)**https://github.com/saastechacademy/foundation/blob/main/udm/intermediate/sql-assignment/sql-assignment-1.md**
+**https://github.com/saastechacademy/foundation/blob/main/udm/intermediate/sql-assignment/sql-assignment-1.md**
 
 **Query 1:**
 
