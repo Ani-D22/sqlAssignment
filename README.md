@@ -1,2 +1,2 @@
-# sqlAssignment1
-Queries for SQL Assignment 1
+# sqlAssignment
+Queries for SQL Assignment 1, 2 and 3
