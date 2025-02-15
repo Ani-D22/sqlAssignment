@@ -2,7 +2,7 @@
 
 ---
 
-1 Completed Sales Orders (Physical Items)
+1. Completed Sales Orders (Physical Items)
 Business Problem:
 Merchants need to track only physical items (requiring shipping and fulfillment) for logistics and shipping-cost analysis.
 
@@ -20,7 +20,7 @@ STATUS_DATETIME
 ORDER_TYPE_ID
 PRODUCT_STORE_ID
 
-Query:
+**Query:**
 
 ```
 select
@@ -46,7 +46,7 @@ on oi.PRODUCT_ID=p.PRODUCT_ID;
 
 ------------------------------------------------------------------------------
 
-2 Completed Return Items
+2. Completed Return Items
 Business Problem:
 Customer service and finance often need insights into returned items to manage refunds, replacements, and inventory restocking.
 
@@ -62,7 +62,7 @@ RETURN_DATE
 ENTRY_DATE
 RETURN_CHANNEL_ENUM_ID
 
-Query:
+**Query:**
 
 ```
 select
@@ -85,7 +85,7 @@ on ri.ORDER_ID=oh.ORDER_ID;
 
 ------------------------------------------------------------------------------
 
-3 Single-Return Orders (Last Month)
+3. Single-Return Orders (Last Month)
 Business Problem:
 The mechandising team needs a list of orders that only have one return.
 
@@ -94,7 +94,7 @@ Fields to Retrieve:
 PARTY_ID
 FIRST_NAME
 
-Query:
+**Query:**
 
 ```
 select 
@@ -110,7 +110,7 @@ HAVING COUNT(rh.return_id) = 1;
 
 ------------------------------------------------------------------------------
 
-4 Returns and Appeasements
+4. Returns and Appeasements
 Business Problem:
 The retailer needs the total amount of items, were returned as well as how many appeasements were issued.
 
@@ -121,7 +121,7 @@ RETURN $ TOTAL
 TOTAL APPEASEMENTS
 APPEASEMENTS $ TOTAL
 
-Query:
+**Query:**
 
 ```
 select 
@@ -137,7 +137,7 @@ where RETURN_ADJUSTMENT_TYPE_ID="APPEASEMENT";
 
 ------------------------------------------------------------------------------
 
-5 Detailed Return Information
+5. Detailed Return Information
 Business Problem:
 Certain teams need granular return data (reason, date, refund amount) for analyzing return rates, identifying recurring issues, or updating policies.
 
@@ -153,7 +153,7 @@ ORDER_DATE
 RETURN_DATE
 PRODUCT_STORE_ID
 
-Query:
+**Query:**
 
 ```
 select 
@@ -173,7 +173,7 @@ on oh.ORDER_ID=ri.order_id;
 
 ------------------------------------------------------------------------------
 
-6 Orders with Multiple Returns
+6. Orders with Multiple Returns
 Business Problem:
 Analyzing orders with multiple returns can identify potential fraud, chronic issues with certain items, or inconsistent shipping processes.
 
@@ -185,7 +185,7 @@ RETURN_DATE
 RETURN_REASON
 RETURN_QUANTITY
 
-Query:
+**Query:**
 
 ```
 SELECT 
@@ -206,7 +206,7 @@ WHERE ri.order_id IN (
 
 ------------------------------------------------------------------------------
 
-8 List of Warehouse Pickers
+8. List of Warehouse Pickers
 Business Problem:
 Warehouse managers need a list of employees responsible for picking and packing orders to manage shifts, productivity, and training needs.
 
@@ -218,7 +218,7 @@ ROLE_TYPE_ID (e.g., “WAREHOUSE_PICKER”)
 FACILITY_ID (assigned warehouse)
 STATUS (active or inactive employee)
 
-Query:
+**Query:**
 
 ```
 select
