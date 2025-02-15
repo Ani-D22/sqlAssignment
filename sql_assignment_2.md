@@ -2,7 +2,7 @@
 
 ---
 
-5.1 Shipping Addresses for October 2023 Orders
+5.1. Shipping Addresses for October 2023 Orders
 Business Problem:
 Customer Service might need to verify addresses for orders placed or completed in October 2023. This helps ensure shipments are delivered correctly and prevents address-related issues.
 
@@ -19,7 +19,7 @@ COUNTRY_CODE
 ORDER_STATUS
 ORDER_DATE
 
-Query:
+**Query:**
 
 ```
 select 
@@ -48,7 +48,7 @@ where o.order_date between
 
 -------------------------------------------------------------------------------------------
 
-5.2 Orders from New York
+5.2. Orders from New York
 Business Problem:
 Companies often want region-specific analysis to plan local marketing, staffing, or promotions in certain areas—here, specifically, New York.
 
@@ -64,7 +64,7 @@ TOTAL_AMOUNT
 ORDER_DATE
 ORDER_STATUS
 
-Query:
+**Query:**
 
 ```
 select 
@@ -93,7 +93,7 @@ and pa.city='New York';
 -------------------------------------------------------------------------------------------
 
 
-5.3 Top-Selling Product in New York
+5.3. Top-Selling Product in New York
 Business Problem:
 Merchandising teams need to identify the best-selling product(s) in a specific region (New York) for targeted restocking or promotions.
 
@@ -105,7 +105,7 @@ TOTAL_QUANTITY_SOLD
 CITY / STATE (within New York region)
 REVENUE (optionally, total sales amount)
 
-Query:
+**Query:**
 
 ```
 select
@@ -130,7 +130,7 @@ order by revenue desc limit 1;
 
 -------------------------------------------------------------------------------------------
 
-7.3 Store-Specific (Facility-Wise) Revenue
+7.3. Store-Specific (Facility-Wise) Revenue
 Business Problem:
 Different physical or online stores (facilities) may have varying levels of performance. The business wants to compare revenue across facilities for sales planning and budgeting.
 
@@ -142,7 +142,7 @@ TOTAL_ORDERS
 TOTAL_REVENUE
 DATE_RANGE
 
-Query:
+**Query:**
 
 ```
 SELECT 
@@ -162,7 +162,7 @@ GROUP BY f.FACILITY_ID ;
 -------------------------------------------------------------------------------------------
 
 
-8.1 Lost and Damaged Inventory
+8.1. Lost and Damaged Inventory
 Business Problem:
 Warehouse managers need to track “shrinkage” such as lost or damaged inventory to reconcile physical vs. system counts.
 
@@ -175,7 +175,7 @@ QUANTITY_LOST_OR_DAMAGED
 REASON_CODE (Lost, Damaged, Expired, etc.)
 TRANSACTION_DATE
 
-Query:
+**Query:**
 
 ```
 SELECT
@@ -192,7 +192,7 @@ where id.reason_enum_id IN ('VAR_LOST','VAR_DAMAGED');
 
 -------------------------------------------------------------------------------------------
 
-8.3 Retrieve the Current Facility (Physical or Virtual) of Open Orders
+8.3. Retrieve the Current Facility (Physical or Virtual) of Open Orders
 Business Problem:
 The business wants to know where open orders are currently assigned, whether in a physical store or a virtual facility (e.g., a distribution center or online fulfillment location).
 
@@ -204,7 +204,7 @@ FACILITY_ID
 FACILITY_NAME
 FACILITY_TYPE_ID
 
-Query:
+**Query:**
 
 ```
 SELECT
@@ -220,7 +220,7 @@ where o.status_id IN ('ORDER_APPROVED','ORDER_CREATED');
 
 -------------------------------------------------------------------------------------------
 
-8.5 Order Item Current Status Changed Date-Time
+8.5. Order Item Current Status Changed Date-Time
 Business Problem:
 Operations teams need to audit when an order item’s status (e.g., from “Pending” to “Shipped”) was last changed, for shipment tracking or dispute resolution.
 
@@ -232,7 +232,7 @@ CURRENT_STATUS_ID
 STATUS_CHANGE_DATETIME
 CHANGED_BY
 
-Query:
+**Query:**
 
 ```
 ```
@@ -241,7 +241,7 @@ Query:
 -------------------------------------------------------------------------------------------
 
 
-8.6 Total Orders by Sales Channel
+8.6. Total Orders by Sales Channel
 Business Problem:
 Marketing and sales teams want to see how many orders come from each channel (e.g., web, mobile app, in-store POS, marketplace) to allocate resources effectively.
 
@@ -253,7 +253,7 @@ TOTAL_REVENUE
 REPORTING_PERIOD
 
 
-Query:
+**Query:**
 
 ```
 select
