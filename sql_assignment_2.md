@@ -1,3 +1,6 @@
+**Assignment Link: https://github.com/saastechacademy/foundation/blob/main/udm/intermediate/sql-assignment/sql-assignment-2.md**
+
+
 5.1 Shipping Addresses for October 2023 Orders
 Business Problem:
 Customer Service might need to verify addresses for orders placed or completed in October 2023. This helps ensure shipments are delivered correctly and prevents address-related issues.
