@@ -17,6 +17,9 @@ ENTRY_DATE
 
 **Query 1:**
 
+**Query Cost:** 17,168.06
+
+
 ```
 SELECT 
     pr.party_id, 
@@ -55,7 +58,12 @@ PRODUCT_TYPE_ID
 INTERNAL_NAME
 
 **Query 2:**
+
 **a:**
+
+**Query Cost:** 2362307.62
+
+
 ```
 select distinct
 	p.product_id,
@@ -72,6 +80,9 @@ on i.product_id=p.product_id;
 
 
 **b:**
+
+**Query Cost:** 2,848,984.52
+
 
 ```
 select distinct
@@ -104,7 +115,11 @@ INTERNAL_NAME
 PRODUCT_TYPE_ID
 NETSUITE_ID (or similar field indicating the NetSuite ID; may be NULL or empty if missing)
 
+
 **Query 3:**
+
+**Query Cost:** 2.2
+
 
 ```
 select distinct
@@ -138,6 +153,9 @@ HOTWAX_ID
 ERP_ID or NETSUITE_ID (depending on naming)
 
 **Query 4:**
+
+**Query Cost:** 300,360.21
+
 
 ```
 SELECT 
@@ -178,6 +196,9 @@ ORDER_ITEM_SEQ_ID
 SHIP_GROUP_SEQ_ID
 
 **Query 5:**
+
+**Query Cost:** 287,040.39
+
 
 ```
 SELECT 
@@ -248,6 +269,9 @@ Shopify Order ID (if applicable)
 
 **Query 7:**
 
+**Query Cost:** 96,674.66
+
+
 ```
 SELECT
 	o.order_id,
@@ -282,6 +306,9 @@ SHIPMENT_STATUS
 
 **Query 8:**
 
+**Query Cost:** 31,546.89
+
+
 ```
 SELECT 
     o.order_id, 
@@ -314,6 +341,9 @@ HOUR
 
 **Query 9:**
 
+**Query Cost:** 4,967.15
+
+
 ```
 SELECT
 	count(o.order_id),
@@ -341,7 +371,24 @@ TOTAL ORDERS
 TOTAL REVENUE
 
 Query10:
-//tbd
+
+**Query Cost:** 11,268.84
+
+
+```
+SELECT
+    COUNT(o.order_id) as TOTAL_ORDERS, 
+    SUM(o.grand_Total)  
+from order_header o
+join order_shipment os
+using (order_id)
+join shipment s
+on os.SHIPMENT_ID=s.SHIPMENT_ID  
+where o.SALES_CHANNEL_ENUM_ID='WEB_SALES_CHANNEL' 
+and s.SHIPMENT_METHOD_TYPE_ID='STOREPICKUP' 
+and o.order_date >='2024-01-01' 
+and o.order_date <'2025-01-01';
+```
 
 -----------------------------------------------------------------------
 
@@ -355,6 +402,9 @@ TOTAL ORDERS
 CANCELATION REASON
 
 **Query 11:**
+
+**Query Cost:** 93.92
+
 
 ```
 select
