@@ -21,6 +21,9 @@ ORDER_DATE
 
 **Query:**
 
+**Query Cost:** 18,267.61
+
+
 ```
 select 
 	o.order_id,
@@ -66,6 +69,9 @@ ORDER_STATUS
 
 **Query:**
 
+**Query Cost:** 8,049.6
+
+
 ```
 select 
 	o.order_id,
@@ -107,6 +113,7 @@ REVENUE (optionally, total sales amount)
 
 **Query:**
 
+
 ```
 select
 	oi.product_id,
@@ -144,6 +151,7 @@ DATE_RANGE
 
 **Query:**
 
+
 ```
 SELECT 
 	f.FACILITY_ID, 
@@ -177,17 +185,19 @@ TRANSACTION_DATE
 
 **Query:**
 
+
 ```
 SELECT
     id.inventory_item_id,
-    i.PRODUCT_ID,
+    i.product_id,
     i.facility_id,
     id.quantity_on_hand_diff AS quantity_lost_or_damaged,
-    id.reason_enum_id AS REASON_CODE,
-    id.effective_date AS TRANSACTION_DATE
-from Inventory_Item_Detail id
-join Inventory_Item i ON id.inventory_item_id = i.inventory_item_id
-where id.reason_enum_id IN ('VAR_LOST','VAR_DAMAGED');
+    id.reason_enum_id AS reason_code,
+    id.effective_date AS transaction_date
+FROM Inventory_Item_Detail id
+JOIN Inventory_Item i 
+    ON id.inventory_item_id = i.inventory_item_id
+WHERE id.reason_enum_id IN ('VAR_LOST', 'VAR_DAMAGED');
 ```
 
 -------------------------------------------------------------------------------------------
