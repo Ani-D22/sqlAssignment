@@ -23,31 +23,31 @@ ORDER_DATE
 
 **Query Cost:** 18,267.61
 
+>>>>>>> main
 
 ```
 select 
-	o.order_id,
-	p.party_id,
+	o.order_id, p.party_id,
 	concat(p.first_name,' ',p.last_name) as customer_name,
-	pa.address1 as street_address,
-	pa.city,
+	pa.address1 as street_address, pa.city,
 	pa.state_province_geo_id as state_province,
-	pa.postal_code,
-	pa.country_geo_id as country_code,
-	o.status_id as order_status,
-	o.order_date
+	pa.postal_code, pa.country_geo_id as country_code,
+	o.status_id as order_status, o.order_date
 from order_header o
-inner join order_contact_mech ocm
-on o.order_id=ocm.order_id
-inner join party_contact_mech pcm
-on ocm.contact_mech_id=pcm.contact_mech_id
-inner join postal_address pa
-on pcm.contact_mech_id=pa.contact_mech_id
-inner join person p
-on pcm.party_id=p.party_id
-where o.order_date between
-'2023-10-01 00:00:01' and '2023-10-31 23:59:59';
+join order_contact_mech ocm on o.order_id=ocm.order_id
+join party_contact_mech pcm on ocm.contact_mech_id=pcm.contact_mech_id
+join postal_address pa on pcm.contact_mech_id=pa.contact_mech_id
+join person p on pcm.party_id=p.party_id
+where o.order_date between '2023-10-01 00:00:01' and '2023-10-31 23:59:59'
+AND o.STATUS_ID IN ('ORDER_CREATED', 'ORDER_COMPLETED')
+AND ocm.CONTACT_MECH_PURPOSE_TYPE_ID='SHIPPING_LOCATION';
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/2279ada3-eb58-4537-b934-ca66aafb5e92)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -69,32 +69,30 @@ ORDER_STATUS
 
 **Query:**
 
-**Query Cost:** 8,049.6
-
+**Query cost:** 8,029.26
 
 ```
 select 
 	o.order_id,
 	concat(p.first_name,' ',p.last_name) as customer_name,
-	pa.address1 as street_address,
-	pa.city,
+	pa.address1 as street_address, pa.city,
 	pa.state_province_geo_id as state_province,
-	pa.postal_code,
-	o.GRAND_TOTAL as total_amount,
-	o.order_date,
-	o.status_id as order_status
+	pa.postal_code, o.GRAND_TOTAL as total_amount,
+	o.order_date, o.status_id as order_status
 from order_header o
-inner join order_contact_mech ocm
-on o.order_id=ocm.order_id
-inner join party_contact_mech pcm
-on ocm.contact_mech_id=pcm.contact_mech_id
-inner join postal_address pa
-on pcm.contact_mech_id=pa.contact_mech_id
-inner join person p
-on pcm.party_id=p.party_id
-where pa.state_province_geo_id='NY'
-and pa.city='New York';
+join order_contact_mech ocm on o.order_id=ocm.order_id
+join party_contact_mech pcm on ocm.contact_mech_id=pcm.contact_mech_id
+and ocm.CONTACT_MECH_PURPOSE_TYPE_ID='SHIPPING_LOCATION'
+join postal_address pa on pcm.contact_mech_id=pa.contact_mech_id
+join person p on pcm.party_id=p.party_id
+where pa.state_province_geo_id='NY' and pa.city='New York';
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/bebe9b78-d6de-4541-a83c-10c4f90716ea)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -113,27 +111,29 @@ REVENUE (optionally, total sales amount)
 
 **Query:**
 
+**Query cost:** 13,319.32
 
 ```
 select
-	oi.product_id,
-	p.internal_name,
+	oi.product_id, p.internal_name,
 	count(oi.product_id) as TOTAL_QUANTITY_SOLD,
 	concat(pa.city,' (',pa.STATE_PROVINCE_GEO_ID,')') as CITY_OR_STATE,
-	sum(oi.UNIT_PRICE) as REVENUE
+	sum(oi.UNIT_PRICE * oi.QUANTITY) as REVENUE
 from order_item oi
-left join product p
-on oi.product_id=p.product_id
-inner join order_contact_mech ocm
-on oi.order_id=ocm.order_id
-inner join postal_address pa
-on ocm.contact_mech_id=pa.contact_mech_id
-group by oi.product_id, 
-    p.internal_name, 
-    pa.city, 
-    pa.STATE_PROVINCE_GEO_ID
-order by revenue desc limit 1;
+left join product p on oi.product_id=p.product_id
+join order_contact_mech ocm on oi.order_id=ocm.order_id
+inner join postal_address pa on ocm.contact_mech_id=pa.contact_mech_id
+where pa.CITY = 'New York' and pa.STATE_PROVINCE_GEO_ID = 'NY' 
+AND oi.status_id = 'ITEM_COMPLETED'
+group by oi.product_id, p.internal_name, pa.city, pa.STATE_PROVINCE_GEO_ID
+order by revenue desc;
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/18032e9e-bd70-407a-8317-1e0d68551823)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -151,21 +151,28 @@ DATE_RANGE
 
 **Query:**
 
+**Query cost:** 93,370.76
 
 ```
 SELECT 
 	f.FACILITY_ID, 
-    f.FACILITY_NAME, 
-    sum(oi.QUANTITY), 
-	sum(o.grand_Total) as REVENUE, 
-	MIN(o.ORDER_DATE) AS START_DATE, 
-    MAX(o.ORDER_DATE) AS END_DATE
-from order_item oi 
-join order_item_ship_group oisg on oi.ORDER_ID=oisg.ORDER_ID 
-join facility f on f.FACILITY_ID=oisg.FACILITY_ID
-join order_header o on o.ORDER_ID=oi.ORDER_ID 
-GROUP BY f.FACILITY_ID ;
+    f.FACILITY_NAME,
+	COUNT(o.order_id) as total_orders,
+	SUM(o.grand_Total) as total_revenue,
+    CONCAT(MIN(o.order_date), ' to ', MAX(o.order_date)) as date_range
+from order_header o
+join order_item_ship_group oisg on o.ORDER_ID = oisg.ORDER_ID 
+join facility f on f.FACILITY_ID = oisg.FACILITY_ID
+WHERE o.status_id = 'ORDER_COMPLETED'
+GROUP BY f.FACILITY_ID
+order by total_revenue desc;
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/fcab50f2-7f16-4f7f-a0d4-c0d30f7d2ac4)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -183,22 +190,70 @@ QUANTITY_LOST_OR_DAMAGED
 REASON_CODE (Lost, Damaged, Expired, etc.)
 TRANSACTION_DATE
 
-**Query:**
+**Query:** 
+
+**Query cost:** 593,754.04
 
 
 ```
 SELECT
-    id.inventory_item_id,
-    i.product_id,
-    i.facility_id,
-    id.quantity_on_hand_diff AS quantity_lost_or_damaged,
-    id.reason_enum_id AS reason_code,
-    id.effective_date AS transaction_date
-FROM Inventory_Item_Detail id
-JOIN Inventory_Item i 
-    ON id.inventory_item_id = i.inventory_item_id
-WHERE id.reason_enum_id IN ('VAR_LOST', 'VAR_DAMAGED');
+    ii.inventory_item_id, ii.PRODUCT_ID, ii.facility_id,
+    ABS(iiv.QUANTITY_ON_HAND_VAR) AS quantity_lost_or_damaged,
+    iiv.variance_reason_id AS REASON_CODE,
+    iiv.created_tx_stamp AS TRANSACTION_DATE
+from inventory_item_variance iiv
+join inventory_item ii ON iiv.inventory_item_id = ii.inventory_item_id
+where iiv.variance_reason_id IN ('DAMAGED', 'VAR_LOST', 'VAR_DAMAGED');
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/d470a83f-3e28-4f6d-8142-1dc4c541402c)
+
+
+
+-------------------------------------------------------------------------------------------
+
+8.2 Low Stock or Out of Stock Items Report
+Business Problem:
+Avoiding out-of-stock situations is critical. This report flags items that have fallen below a certain reorder threshold or have zero available stock.
+
+Fields to Retrieve:
+
+PRODUCT_ID
+PRODUCT_NAME
+FACILITY_ID
+QOH (Quantity on Hand)
+ATP (Available to Promise)
+REORDER_THRESHOLD
+DATE_CHECKED
+
+**Query:** 
+
+**Query cost:** 593,754.04
+
+```
+SELECT 
+    p.PRODUCT_ID,
+    p.PRODUCT_NAME,
+    ii.FACILITY_ID,
+    ii.QUANTITY_ON_HAND_TOTAL AS QOH,
+    ii.AVAILABLE_TO_PROMISE_TOTAL AS ATP,
+    pf.REORDER_QUANTITY AS REORDER_THRESHOLD,
+    pf.LAST_UPDATED_STAMP AS DATE_CHECKED
+FROM PRODUCT p 
+JOIN INVENTORY_ITEM ii ON p.PRODUCT_ID = ii.PRODUCT_ID
+LEFT JOIN product_facility pf ON pf.PRODUCT_ID = ii.PRODUCT_ID
+AND pf.FACILITY_ID = ii.FACILITY_ID
+WHERE pf.MINIMUM_STOCK > ii.QUANTITY_ON_HAND_TOTAL
+OR ii.AVAILABLE_TO_PROMISE_TOTAL = 0;
+```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/029479b3-4e90-4abb-abef-c7f888db77b2)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -216,6 +271,8 @@ FACILITY_TYPE_ID
 
 **Query:**
 
+**Query cost:** 23,858.46
+
 ```
 SELECT
     o.order_id,
@@ -227,6 +284,47 @@ from order_header o
 join facility f ON o.origin_facility_id = f.facility_id 
 where o.status_id IN ('ORDER_APPROVED','ORDER_CREATED');
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/8c0a15df-6640-49a5-8fb9-f3560e048cc9)
+
+
+
+-------------------------------------------------------------------------------------------
+
+8.4. Items Where QOH and ATP Differ
+Business Problem:
+Sometimes the Quantity on Hand (QOH) doesn’t match the Available to Promise (ATP) due to pending orders, reservations, or data discrepancies. This needs review for accurate fulfillment planning.
+
+Fields to Retrieve:
+
+PRODUCT_ID
+FACILITY_ID
+QOH (Quantity on Hand)
+ATP (Available to Promise)
+DIFFERENCE (QOH - ATP)
+
+**Query:**
+
+**Query cost:** 2,915,645.7
+
+```
+select ii.product_id,
+       ii.facility_id,
+       ii.quantity_on_hand_total as QOH,
+       ii.available_to_promise_total as ATP,
+       iid.AVAILABLE_TO_PROMISE_DIFF as Difference
+from Inventory_Item ii
+join inventory_item_detail iid on ii.INVENTORY_ITEM_ID = iid.INVENTORY_ITEM_ID
+WHERE QUANTITY_ON_HAND_TOTAL <> AVAILABLE_TO_PROMISE_TOTAL;
+```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/9c8942f5-0269-41c5-8454-a955da28b81b)
+
+
 
 -------------------------------------------------------------------------------------------
 
@@ -244,8 +342,26 @@ CHANGED_BY
 
 **Query:**
 
+**Query cost:** 1,707,343.5
+
 ```
+SELECT 
+    os.ORDER_ID,
+    os.ORDER_ITEM_SEQ_ID,
+    os.STATUS_ID AS CURRENT_STATUS_ID,
+    os.STATUS_DATETIME AS STATUS_CHANGE_DATETIME,
+    os.STATUS_USER_LOGIN AS CHANGED_BY
+FROM order_status os
+JOIN order_status os2 ON os.ORDER_ID = os2.ORDER_ID
+AND os.ORDER_ITEM_SEQ_ID = os2.ORDER_ITEM_SEQ_ID
+WHERE os.ORDER_ITEM_SEQ_ID IS NOT NULL
+AND os.STATUS_DATETIME < os2.STATUS_DATETIME;
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/fbc0292b-aebb-4347-8a34-d8022173492e)
+
 
 
 -------------------------------------------------------------------------------------------
@@ -265,6 +381,8 @@ REPORTING_PERIOD
 
 **Query:**
 
+**Query cost:** 8,450.55
+
 ```
 select
 	sales_channel_enum_id as SALES_CHANNEL,
@@ -275,5 +393,11 @@ from order_header oh
 GROUP BY SALES_CHANNEL, REPORTING_PERIOD
 ORDER BY REPORTING_PERIOD DESC;
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/0277e3e5-ce42-4a4e-af0b-48d125ef4fa8)
+
+
 
 ---------------------------------------------------------------------------------------------
