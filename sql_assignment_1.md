@@ -17,32 +17,26 @@ ENTRY_DATE
 
 **Query 1:**
 
-**Query Cost:** 17,168.06
+**Query Cost:** 15,907.31
 
 
 ```
 SELECT 
-    pr.party_id, 
-    pr.first_name, 
-    pr.last_name, 
-    cm.info_string AS email, 
-    tn.contact_number AS phone, 
-    p.created_date AS entry_date
-FROM party p
-INNER JOIN person pr on p.party_id=pr.party_id
-INNER JOIN party_role prl ON prl.party_id = pr.party_id
+    pr.party_id, pr.first_name, pr.last_name, 
+    cm.info_string AS email, tn.contact_number AS phone,
+    pr.created_stamp AS entry_date
+FROM person pr INNER JOIN party_role prl ON pr.party_id = prl.party_id
 INNER JOIN party_contact_mech pcm ON pr.party_id = pcm.party_id
 INNER JOIN contact_mech cm ON pcm.contact_mech_id = cm.contact_mech_id
-INNER JOIN telecom_number tn ON pcm.contact_mech_id = tn.contact_mech_id
-WHERE
-    (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NULL)
+LEFT JOIN telecom_number tn ON pcm.contact_mech_id = tn.contact_mech_id
+WHERE (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NULL)
     AND prl.role_type_id = 'CUSTOMER'
-    AND p.created_date BETWEEN '2023-06-01 00:00:00' AND '2023-06-30 23:59:59';
+    AND pr.created_stamp BETWEEN '2023-06-01 00:00:00' AND '2023-06-30 23:59:59';
 ```
     
 **Output:**
 
-![image](https://github.com/user-attachments/assets/f9f8d1b1-2014-43ac-b047-34d440cde592)
+![image](https://github.com/user-attachments/assets/102492f4-07a8-4faf-8a98-fec90e41daa7)
 
 
 -----------------------------------------------------------------------
@@ -61,7 +55,7 @@ INTERNAL_NAME
 
 **a:**
 
-**Query Cost:** 2362307.62
+**Query Cost:** 81,900.39
 
 
 ```
@@ -69,37 +63,16 @@ select distinct
 	p.product_id,
 	p.product_type_id,
 	p.internal_name
-from inventory_item i
-left join product p
-on i.product_id=p.product_id;
+from product p
+JOIN PRODUCT_TYPE pt ON p.product_type_id = pt.product_type_id
+where pt.is_physical='Y' and p.is_variant ='Y'
+and p.sales_discontinuation_date is null;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/91d3727a-e394-4982-aa85-d3c8aa530934)
+![image](https://github.com/user-attachments/assets/a55def8f-d09c-4007-b91e-05f633dcb11e)
 
-
-**b:**
-
-**Query Cost:** 2,848,984.52
-
-
-```
-select distinct
-	p.product_id,
-	p.product_type_id,
-	p.internal_name
-from inventory_item i
-left join product p
-on i.product_id=p.product_id
-inner join product_type pt
-on p.product_type_id=pt.product_type_id
-where pt.is_physical='Y';
-```
-
-**Output:**
-
-![image](https://github.com/user-attachments/assets/ba64e646-1b95-46f6-bb63-d98431dfef29)
 
 
 -----------------------------------------------------------------------
@@ -118,25 +91,26 @@ NETSUITE_ID (or similar field indicating the NetSuite ID; may be NULL or empty i
 
 **Query 3:**
 
-**Query Cost:** 2.2
+**Query Cost:** 747,058.6
 
 
 ```
-select distinct
+select
 	p.product_id,
 	p.internal_name,
 	p.product_type_id,
 	gi.id_value as NETSUITE_ID
-from good_identification gi
-left join product p
+from product p
+left join good_identification gi
 on gi.product_id=p.product_id
-where gi.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
-and gi.ID_VALUE is null;
+and gi.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
+where gi.ID_VALUE = '' or gi.ID_VALUE is null;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/11c87627-f311-4144-bde2-3d11c2d51d4b)
+![image](https://github.com/user-attachments/assets/88ee3295-fc4d-4759-baa8-dff3a50c0297)
+
 
 
 -----------------------------------------------------------------------
@@ -154,23 +128,25 @@ ERP_ID or NETSUITE_ID (depending on naming)
 
 **Query 4:**
 
-**Query Cost:** 300,360.21
+**Query Cost:** 120,632.42
 
 
 ```
 SELECT 
-    gi.product_id, 
-    (CASE WHEN gi.GOOD_IDENTIFICATION_TYPE_ID = 'SHOPIFY_PROD_ID' THEN gi.id_value END) AS shopify_id, 
-    (CASE WHEN gi.GOOD_IDENTIFICATION_TYPE_ID = 'HC_GOOD_ID_TYPE' THEN gi.id_value END) AS hotwax_id, 
-    (CASE WHEN gi.GOOD_IDENTIFICATION_TYPE_ID = 'ERP_ID' THEN gi.id_value END) AS erp_id
-FROM good_identification gi 
-    WHERE gi.GOOD_IDENTIFICATION_TYPE_ID IN ('SHOPIFY_PROD_ID', 'HC_GOOD_ID_TYPE', 'ERP_ID')
-GROUP BY gi.product_id;
+    p.PRODUCT_ID as PRODUCT_ID,
+    sp.shopify_product_id AS SHOPIFY_ID,
+    p.PRODUCT_ID as Hotwax_ID,
+    gi.ID_VALUE AS ERP_ID
+FROM product p
+LEFT JOIN good_identification gi ON p.PRODUCT_ID = gi.PRODUCT_ID
+AND gi.GOOD_IDENTIFICATION_TYPE_ID = 'ERP_ID'
+JOIN shopify_product sp ON sp.product_id = p.product_id
+where gi.id_value is not null;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/83138b6f-78f3-4854-966f-dcdc35947fff)
+![image](https://github.com/user-attachments/assets/1e3ab939-2c28-419a-af58-a1b5e55e14fd)
 
 
 ----------------------------------------------------------------------------------------------------------------------
@@ -200,8 +176,7 @@ SHIP_GROUP_SEQ_ID
 **Query Cost:** 287,040.39
 
 
-```
-SELECT 
+```SELECT 
     OH.ORDER_ID,
     OH.STATUS_ID,
     OH.EXTERNAL_ID,
@@ -215,42 +190,32 @@ SELECT
     F.FACILITY_ID,
     F.FACILITY_TYPE_ID,
     F.PRODUCT_STORE_ID
-FROM ORDER_HEADER OH
-JOIN ORDER_STATUS OS
-ON OS.STATUS_ID = 'ORDER_COMPLETED'
-AND OS.ORDER_ID = OH.ORDER_ID
-AND OS.STATUS_DATETIME BETWEEN '2023-08-01' AND '2023-09-01'
+FROM ORDER_HEADER OH JOIN ORDER_STATUS OS
+	ON OS.STATUS_ID = 'ORDER_COMPLETED'
+	AND OS.ORDER_ID = OH.ORDER_ID
+	AND OS.STATUS_DATETIME BETWEEN '2023-08-01' AND '2023-09-01'
 JOIN ORDER_HISTORY OH2
-ON OH.ORDER_ID = OH2.ORDER_ID
+	ON OH.ORDER_ID = OH2.ORDER_ID
 JOIN ORDER_ITEM OI
-ON OI.ORDER_ITEM_SEQ_ID = OH2.ORDER_ITEM_SEQ_ID
-AND OI.ORDER_ID = OH2.ORDER_ID
+	ON OI.ORDER_ITEM_SEQ_ID = OH2.ORDER_ITEM_SEQ_ID
+	AND OI.ORDER_ID = OH2.ORDER_ID
 JOIN PRODUCT P
-ON OI.PRODUCT_ID = P.PRODUCT_ID
+	ON OI.PRODUCT_ID = P.PRODUCT_ID
 JOIN ORDER_ITEM_SHIP_GROUP OSG
-ON OH2.SHIP_GROUP_SEQ_ID = OSG.SHIP_GROUP_SEQ_ID
-AND OH2.ORDER_ID = OSG.ORDER_ID
+	ON OH2.SHIP_GROUP_SEQ_ID = OSG.SHIP_GROUP_SEQ_ID
+	AND OH2.ORDER_ID = OSG.ORDER_ID
 JOIN FACILITY F
-ON OSG.FACILITY_ID = F.FACILITY_ID
+	ON OSG.FACILITY_ID = F.FACILITY_ID
 GROUP BY
-    OH.ORDER_ID,
-    OH.STATUS_ID,
-    OH.EXTERNAL_ID,
-    OH2.ORDER_HISTORY_ID,
-    OI.ORDER_ITEM_SEQ_ID,
-    OI.QUANTITY,
-    P.PRODUCT_ID,
-    P.PRODUCT_TYPE_ID,
-    P.INTERNAL_NAME,
-    OSG.SHIP_GROUP_SEQ_ID,
-    F.FACILITY_ID,
-    F.FACILITY_TYPE_ID,
-    F.PRODUCT_STORE_ID;
+    OH.ORDER_ID, OH.STATUS_ID, OH.EXTERNAL_ID, OH2.ORDER_HISTORY_ID,
+    OI.ORDER_ITEM_SEQ_ID, OI.QUANTITY, P.PRODUCT_ID, P.PRODUCT_TYPE_ID, P.INTERNAL_NAME,
+    OSG.SHIP_GROUP_SEQ_ID, F.FACILITY_ID, F.FACILITY_TYPE_ID, F.PRODUCT_STORE_ID;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/0c3a4d8b-57da-42e9-b1fe-310fea6a7e2f)
+![image](https://github.com/user-attachments/assets/3acbf8c2-6d3c-46c2-b5cc-55ae8cfdf8fb)
+
 
 
 ----------------------------------------------------------------------------------------------------------------------
@@ -269,7 +234,7 @@ Shopify Order ID (if applicable)
 
 **Query 7:**
 
-**Query Cost:** 96,674.66
+**Query Cost:** 2,518.98
 
 
 ```
@@ -277,18 +242,18 @@ SELECT
 	o.order_id,
     o.grand_total as Total_amount,
     op.payment_method_type_id as payment_method,
-    o.external_id as shopify_order_id,
-  --o.order_date
+    o.external_id as shopify_order_id
 FROM order_header o
 left join order_payment_preference op
 on o.order_id=op.order_id
-order by o.order_date DESC
-limit 500;
+where o.status_id = 'ORDER_CREATED' and o.order_type_id='SALES_ORDER'
+order by o.order_date DESC;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/df111c19-eab0-43d6-a356-cee7a0e2be3c)
+![image](https://github.com/user-attachments/assets/a5409665-4e0a-4472-953a-0147e045ff6a)
+
 
 
 -----------------------------------------------------------------------
@@ -306,7 +271,7 @@ SHIPMENT_STATUS
 
 **Query 8:**
 
-**Query Cost:** 31,546.89
+**Query Cost:** 19,522.58
 
 
 ```
@@ -318,14 +283,14 @@ SELECT
 FROM order_header o
 INNER JOIN order_payment_preference p ON o.order_id = p.order_id
 LEFT JOIN shipment s ON o.order_id = s.primary_order_id
-WHERE 
-    p.status_id <> 'PAYMENT_RECEIVED'
-    AND s.status_id <> 'SHIPPED';
+WHERE p.status_id NOT IN ('PAYMENT_RECEIVED','PAYMENT_SETTLED')
+    AND s.status_id <> 'SHIPMENT_SHIPPED';
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/18dcf1a4-98de-4fc6-914a-46ab34e9e7ab)
+![image](https://github.com/user-attachments/assets/408be6fc-97e4-45c7-8edc-7686298a7a0f)
+
 
 
 -----------------------------------------------------------------------
@@ -346,17 +311,18 @@ HOUR
 
 ```
 SELECT
-	count(o.order_id),
-	hour(o.order_date)
-from order_header o
-where o.order_date between '2024-10-28 00:00:01' and '2024-10-28 23:59:59'
+	count(o.order_id) as total_order,
+	hour(o.STATUS_DATETIME) as hour
+from order_status o
+where o.STATUS_DATETIME  between '2024-10-28 00:00:01' and '2024-10-28 23:59:59'
 and o.status_id = 'ORDER_COMPLETED'
-group by hour(o.order_date);
+group by hour order by hour;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/ba76ed67-0f18-41ca-9ef1-e278566e9c8c)
+![image](https://github.com/user-attachments/assets/b4f944d8-8056-4887-bad3-de174eca8604)
+
 
 
 -----------------------------------------------------------------------
@@ -372,23 +338,25 @@ TOTAL REVENUE
 
 Query10:
 
-**Query Cost:** 11,268.84
+**Query Cost:** 1,620.09
 
 
 ```
 SELECT
-    COUNT(o.order_id) as TOTAL_ORDERS, 
-    SUM(o.grand_Total)  
+    COUNT(o.order_id) as total_orders, 
+    SUM(o.grand_Total) as total_revenue
 from order_header o
-join order_shipment os
-using (order_id)
-join shipment s
-on os.SHIPMENT_ID=s.SHIPMENT_ID  
-where o.SALES_CHANNEL_ENUM_ID='WEB_SALES_CHANNEL' 
-and s.SHIPMENT_METHOD_TYPE_ID='STOREPICKUP' 
-and o.order_date >='2024-01-01' 
-and o.order_date <'2025-01-01';
+join order_item_ship_group oisg
+on oisg.order_id = o.order_id
+where oisg.shipment_method_type_id = 'STOREPICKUP' 
+and o.order_date BETWEEN '2024-01-01' AND '2025-01-01';
 ```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/74a5e56e-0b04-42c3-b54e-3a0a79d0837d)
+
+
 
 -----------------------------------------------------------------------
 
@@ -408,18 +376,20 @@ CANCELATION REASON
 
 ```
 select
-	count(o.order_id),
-    os.CHANGE_REASON_ENUM_ID
+	count(o.order_id) as total_orders,
+    os.CHANGE_REASON as cancellation_reason
 from order_header o
 inner join order_status os
 on o.order_id=os.order_id
 where o.order_date between '2024-12-01 00:00:01' and '2024-12-31 23:59:59'
-and o.status_id = 'ORDER_CANCELLED' and CHANGE_REASON_ENUM_ID is not null;
+and o.status_id = 'ORDER_CANCELLED' and CHANGE_REASON is not null
+group by os.CHANGE_REASON;
 ```
 
 **Output:**
 
-![image](https://github.com/user-attachments/assets/7cd8dea3-44e7-4efa-aa5b-51bfcb6ebae2)
+![image](https://github.com/user-attachments/assets/cc152403-4be8-47c4-aa33-4888bc6878be)
+
 
 
 -----------------------------------------------------------------------
@@ -433,8 +403,25 @@ PRODUCT ID
 THRESHOLD
 
 **Query 12:**
-//tbd
+
+**Query Cost:** 60,275.4
+
+```
+SELECT 
+    pf.PRODUCT_ID, 
+    pf.MINIMUM_STOCK AS THRESHOLD
+FROM PRODUCT_FACILITY pf
+JOIN FACILITY f
+ON f.FACILITY_ID = pf.FACILITY_ID
+where f.FACILITY_TYPE_ID = 'CONFIGURATION'
+AND pf.MINIMUM_STOCK > 0 OR NOT NULL
+ORDER BY THRESHOLD DESC;
+```
+
+**Output:**
+
+![image](https://github.com/user-attachments/assets/2d8ff762-b138-4167-8f4c-552adc1cf80a)
+
+
 
 -----------------------------------------------------------------------
-
-
