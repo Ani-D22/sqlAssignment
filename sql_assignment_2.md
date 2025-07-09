@@ -21,10 +21,9 @@ ORDER_DATE
 
 **Query:**
 
-**Query Cost:** 18,267.61
+**Query Cost:** 36,888.31
 
-```
-select 
+```select 
 	o.order_id, p.party_id,
 	concat(p.first_name,' ',p.last_name) as customer_name,
 	pa.address1 as street_address, pa.city,
@@ -32,13 +31,15 @@ select
 	pa.postal_code, pa.country_geo_id as country_code,
 	o.status_id as order_status, o.order_date
 from order_header o
+join order_status os on o.order_id = os.order_id
 join order_contact_mech ocm on o.order_id=ocm.order_id
-join party_contact_mech pcm on ocm.contact_mech_id=pcm.contact_mech_id
-join postal_address pa on pcm.contact_mech_id=pa.contact_mech_id
-join person p on pcm.party_id=p.party_id
-where o.order_date between '2023-10-01 00:00:01' and '2023-10-31 23:59:59'
-AND o.STATUS_ID IN ('ORDER_CREATED', 'ORDER_COMPLETED')
-AND ocm.CONTACT_MECH_PURPOSE_TYPE_ID='SHIPPING_LOCATION';
+join postal_address pa on ocm.contact_mech_id=pa.contact_mech_id
+join order_role orl on orl.order_id = o.order_id
+join person p on orl.party_id=p.party_id
+where os.STATUS_DATETIME between '2020-10-01 00:00:00' and '2023-10-31 23:59:59'
+and os.STATUS_ID = 'ORDER_COMPLETED'
+and orl.ROLE_TYPE_ID = 'SHIP_TO_CUSTOMER'
+and ocm.CONTACT_MECH_PURPOSE_TYPE_ID='SHIPPING_LOCATION';
 ```
 
 **Output:**
