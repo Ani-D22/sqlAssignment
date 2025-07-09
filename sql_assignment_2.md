@@ -23,8 +23,6 @@ ORDER_DATE
 
 **Query Cost:** 18,267.61
 
->>>>>>> main
-
 ```
 select 
 	o.order_id, p.party_id,
