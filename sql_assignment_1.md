@@ -3,6 +3,7 @@
 ---
 
 1. New Customers Acquired in June 2023
+
 Business Problem:
 The marketing team ran a campaign in June 2023 and wants to see how many new customers signed up during that period.
 
@@ -17,21 +18,29 @@ ENTRY_DATE
 
 **Query 1:**
 
-**Query Cost:** 15,907.31
+**Query Cost:** 16,276.42
 
 
 ```
 SELECT 
-    pr.party_id, pr.first_name, pr.last_name, 
-    cm.info_string AS email, tn.contact_number AS phone,
-    pr.created_stamp AS entry_date
-FROM person pr INNER JOIN party_role prl ON pr.party_id = prl.party_id
-INNER JOIN party_contact_mech pcm ON pr.party_id = pcm.party_id
-INNER JOIN contact_mech cm ON pcm.contact_mech_id = cm.contact_mech_id
-LEFT JOIN telecom_number tn ON pcm.contact_mech_id = tn.contact_mech_id
-WHERE (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NULL)
-    AND prl.role_type_id = 'CUSTOMER'
-    AND pr.created_stamp BETWEEN '2023-06-01 00:00:00' AND '2023-06-30 23:59:59';
+    PR.PARTY_ID,
+	PR.FIRST_NAME,
+	PR.LAST_NAME, 
+    CM.INFO_STRING AS EMAIL,
+	TN.CONTACT_NUMBER AS PHONE,
+    PR.CREATED_STAMP AS ENTRY_DATE
+FROM PERSON PR
+	JOIN PARTY_ROLE PRL
+		ON PR.PARTY_ID = PRL.PARTY_ID
+	JOIN PARTY_CONTACT_MECH PCM
+		ON PR.PARTY_ID = PCM.PARTY_ID
+		AND PRL.ROLE_TYPE_ID = 'CUSTOMER'
+	JOIN CONTACT_MECH CM
+		ON PCM.CONTACT_MECH_ID = CM.CONTACT_MECH_ID
+	LEFT JOIN TELECOM_NUMBER TN
+		ON PCM.CONTACT_MECH_ID = TN.CONTACT_MECH_ID
+WHERE (CM.CONTACT_MECH_TYPE_ID = 'EMAIL_ADDRESS' OR TN.CONTACT_NUMBER IS NOT NULL)
+    AND PR.CREATED_STAMP BETWEEN '2023-06-01 00:00:00' AND '2023-06-31 23:59:59';
 ```
     
 **Output:**
@@ -42,6 +51,7 @@ WHERE (cm.contact_mech_type_id = 'EMAIL_ADDRESS' OR tn.contact_number IS NOT NUL
 -----------------------------------------------------------------------
 
 2. List All Active Physical Products
+
 Business Problem:
 Merchandising teams often need a list of all physical products to manage logistics, warehousing, and shipping.
 
@@ -53,20 +63,19 @@ INTERNAL_NAME
 
 **Query 2:**
 
-**a:**
-
-**Query Cost:** 81,900.39
+**Query Cost:** 82,090.04
 
 
 ```
-select distinct
-	p.product_id,
-	p.product_type_id,
-	p.internal_name
-from product p
-JOIN PRODUCT_TYPE pt ON p.product_type_id = pt.product_type_id
-where pt.is_physical='Y' and p.is_variant ='Y'
-and p.sales_discontinuation_date is null;
+SELECT P.PRODUCT_ID,
+	P.PRODUCT_TYPE_ID,
+	P.INTERNAL_NAME
+FROM PRODUCT P
+	JOIN PRODUCT_TYPE PT
+		ON P.PRODUCT_TYPE_ID = PT.PRODUCT_TYPE_ID
+WHERE PT.IS_PHYSICAL='Y'
+	AND P.IS_VARIANT ='Y'
+	AND P.SALES_DISCONTINUATION_DATE IS NULL;
 ```
 
 **Output:**
@@ -78,6 +87,7 @@ and p.sales_discontinuation_date is null;
 -----------------------------------------------------------------------
 
 3. Products Missing NetSuite ID
+
 Business Problem:
 A product cannot sync to NetSuite unless it has a valid NetSuite ID. The OMS needs a list of all products that still need to be created or updated in NetSuite.
 
@@ -91,20 +101,19 @@ NETSUITE_ID (or similar field indicating the NetSuite ID; may be NULL or empty i
 
 **Query 3:**
 
-**Query Cost:** 747,058.6
+**Query Cost:** 835,893.79
 
 
 ```
-select
-	p.product_id,
-	p.internal_name,
-	p.product_type_id,
-	gi.id_value as NETSUITE_ID
-from product p
-left join good_identification gi
-on gi.product_id=p.product_id
-and gi.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
-where gi.ID_VALUE = '' or gi.ID_VALUE is null;
+SELECT P.PRODUCT_ID,
+	P.INTERNAL_NAME,
+	P.PRODUCT_TYPE_ID,
+	GI.ID_VALUE AS NETSUITE_ID
+FROM PRODUCT P
+	LEFT JOIN GOOD_IDENTIFICATION GI
+		ON GI.PRODUCT_ID=P.PRODUCT_ID
+		AND GI.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
+WHERE GI.ID_VALUE = '' OR GI.ID_VALUE IS NULL;
 ```
 
 **Output:**
@@ -128,20 +137,22 @@ ERP_ID or NETSUITE_ID (depending on naming)
 
 **Query 4:**
 
-**Query Cost:** 120,632.42
+**Query Cost:** 115,248.67
 
 
 ```
 SELECT 
-    p.PRODUCT_ID as PRODUCT_ID,
-    sp.shopify_product_id AS SHOPIFY_ID,
-    p.PRODUCT_ID as Hotwax_ID,
-    gi.ID_VALUE AS ERP_ID
-FROM product p
-LEFT JOIN good_identification gi ON p.PRODUCT_ID = gi.PRODUCT_ID
-AND gi.GOOD_IDENTIFICATION_TYPE_ID = 'ERP_ID'
-JOIN shopify_product sp ON sp.product_id = p.product_id
-where gi.id_value is not null;
+    P.PRODUCT_ID AS PRODUCT_ID,
+    SP.SHOPIFY_PRODUCT_ID AS SHOPIFY_ID,
+    P.PRODUCT_ID AS HOTWAX_ID,
+    GI.ID_VALUE AS ERP_ID
+FROM PRODUCT P
+	JOIN GOOD_IDENTIFICATION GI
+		ON P.PRODUCT_ID = GI.PRODUCT_ID
+		AND GI.GOOD_IDENTIFICATION_TYPE_ID = 'ERP_ID'
+	JOIN SHOPIFY_PRODUCT SP
+		ON SP.PRODUCT_ID = P.PRODUCT_ID
+WHERE GI.ID_VALUE IS NOT NULL;
 ```
 
 **Output:**
