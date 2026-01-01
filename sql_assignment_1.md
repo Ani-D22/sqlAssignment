@@ -125,6 +125,7 @@ WHERE GI.ID_VALUE = '' OR GI.ID_VALUE IS NULL;
 -----------------------------------------------------------------------
 
 4. Product IDs Across Systems
+
 Business Problem:
 To sync an order or product across multiple systems (e.g., Shopify, HotWax, ERP/NetSuite), the OMS needs to know each system’s unique identifier for that product. This query retrieves the Shopify ID, HotWax ID, and ERP ID (NetSuite ID) for all products.
 
@@ -233,6 +234,7 @@ JOIN FACILITY F
 ----------------------------------------------------------------------------------------------------------------------
 
 7. Newly Created Sales Orders and Payment Methods
+
 Business Problem:
 Finance teams need to see new orders and their payment methods for reconciliation and fraud checks.
 
@@ -271,6 +273,7 @@ ORDER BY O.ORDER_DATE DESC;
 -----------------------------------------------------------------------
 
 8. Payment Captured but Not Shipped
+
 Business Problem:
 Finance teams want to ensure revenue is recognized properly. If payment is captured but no shipment has occurred, it warrants further review.
 
@@ -310,6 +313,7 @@ WHERE P.STATUS_ID NOT IN ('PAYMENT_RECEIVED', 'PAYMENT_SETTLED')
 -----------------------------------------------------------------------
 
 9 Orders Completed Hourly
+
 Business Problem:
 Operations teams may want to see how orders complete across the day to schedule staffing.
 
@@ -347,6 +351,7 @@ ORDER BY HOUR;
 -----------------------------------------------------------------------
 
 10. BOPIS Orders Revenue (Last Year)
+
 Business Problem:
 BOPIS (Buy Online, Pickup In Store) is a key retail strategy. Finance wants to know the revenue from BOPIS orders for the previous year.
 
@@ -385,6 +390,7 @@ WHERE
 -----------------------------------------------------------------------
 
 11. Canceled Orders (Last Month)
+
 Business Problem:
 The merchandising team needs to know how many orders were canceled in the previous month and their reasons.
 
@@ -426,7 +432,9 @@ GROUP BY
 -----------------------------------------------------------------------
 
 12. Product Threshold Value
-Business Problem The retailer has set a threshild value for products that are sold online, in order to avoid over selling.
+
+Business Problem:
+The retailer has set a threshild value for products that are sold online, in order to avoid over selling.
 
 Fields to Retrieve:
 
