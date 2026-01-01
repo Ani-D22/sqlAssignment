@@ -164,6 +164,7 @@ WHERE GI.ID_VALUE IS NOT NULL;
 ----------------------------------------------------------------------------------------------------------------------
 
 5. Completed Orders in August 2023
+
 Business Problem:
 After running similar reports for a previous month, you now need all completed orders in August 2023 for analysis.
 
@@ -187,11 +188,12 @@ SHIP_GROUP_SEQ_ID
 **Query Cost:** 287,040.39
 
 
-```SELECT 
+```
+SELECT DISTINCT
     OH.ORDER_ID,
     OH.STATUS_ID,
     OH.EXTERNAL_ID,
-    OH2.ORDER_HISTORY_ID,
+    OHI.ORDER_HISTORY_ID,
     OI.ORDER_ITEM_SEQ_ID,
     OI.QUANTITY,
     P.PRODUCT_ID,
@@ -201,26 +203,24 @@ SHIP_GROUP_SEQ_ID
     F.FACILITY_ID,
     F.FACILITY_TYPE_ID,
     F.PRODUCT_STORE_ID
-FROM ORDER_HEADER OH JOIN ORDER_STATUS OS
-	ON OS.STATUS_ID = 'ORDER_COMPLETED'
-	AND OS.ORDER_ID = OH.ORDER_ID
-	AND OS.STATUS_DATETIME BETWEEN '2023-08-01' AND '2023-09-01'
-JOIN ORDER_HISTORY OH2
-	ON OH.ORDER_ID = OH2.ORDER_ID
+FROM ORDER_HEADER OH
+JOIN ORDER_STATUS OS
+    ON OS.ORDER_ID = OH.ORDER_ID
+   AND OS.STATUS_ID = 'ORDER_COMPLETED'
+   AND OS.STATUS_DATETIME >= '2023-08-01 00:00:00'
+   AND OS.STATUS_DATETIME <=  '2023-08-31 59:59:59'
+JOIN ORDER_HISTORY OHI
+    ON OHI.ORDER_ID = OH.ORDER_ID
 JOIN ORDER_ITEM OI
-	ON OI.ORDER_ITEM_SEQ_ID = OH2.ORDER_ITEM_SEQ_ID
-	AND OI.ORDER_ID = OH2.ORDER_ID
+    ON OI.ORDER_ID = OHI.ORDER_ID
+   AND OI.ORDER_ITEM_SEQ_ID = OHI.ORDER_ITEM_SEQ_ID
 JOIN PRODUCT P
-	ON OI.PRODUCT_ID = P.PRODUCT_ID
+    ON P.PRODUCT_ID = OI.PRODUCT_ID
 JOIN ORDER_ITEM_SHIP_GROUP OSG
-	ON OH2.SHIP_GROUP_SEQ_ID = OSG.SHIP_GROUP_SEQ_ID
-	AND OH2.ORDER_ID = OSG.ORDER_ID
+    ON OSG.ORDER_ID = OHI.ORDER_ID
+   AND OSG.SHIP_GROUP_SEQ_ID = OHI.SHIP_GROUP_SEQ_ID
 JOIN FACILITY F
-	ON OSG.FACILITY_ID = F.FACILITY_ID
-GROUP BY
-    OH.ORDER_ID, OH.STATUS_ID, OH.EXTERNAL_ID, OH2.ORDER_HISTORY_ID,
-    OI.ORDER_ITEM_SEQ_ID, OI.QUANTITY, P.PRODUCT_ID, P.PRODUCT_TYPE_ID, P.INTERNAL_NAME,
-    OSG.SHIP_GROUP_SEQ_ID, F.FACILITY_ID, F.FACILITY_TYPE_ID, F.PRODUCT_STORE_ID;
+    ON F.FACILITY_ID = OSG.FACILITY_ID;
 ```
 
 **Output:**
@@ -249,16 +249,17 @@ Shopify Order ID (if applicable)
 
 
 ```
-SELECT
-	o.order_id,
-    o.grand_total as Total_amount,
-    op.payment_method_type_id as payment_method,
-    o.external_id as shopify_order_id
-FROM order_header o
-left join order_payment_preference op
-on o.order_id=op.order_id
-where o.status_id = 'ORDER_CREATED' and o.order_type_id='SALES_ORDER'
-order by o.order_date DESC;
+SELECT DISTINCT
+    O.ORDER_ID,
+    O.GRAND_TOTAL AS TOTAL_AMOUNT,
+    OP.PAYMENT_METHOD_TYPE_ID AS PAYMENT_METHOD,
+    O.EXTERNAL_ID AS SHOPIFY_ORDER_ID
+FROM ORDER_HEADER O
+LEFT JOIN ORDER_PAYMENT_PREFERENCE OP
+    ON OP.ORDER_ID = O.ORDER_ID
+WHERE O.STATUS_ID = 'ORDER_CREATED'
+  AND O.ORDER_TYPE_ID = 'SALES_ORDER'
+ORDER BY O.ORDER_DATE DESC;
 ```
 
 **Output:**
@@ -286,16 +287,18 @@ SHIPMENT_STATUS
 
 
 ```
-SELECT 
-    o.order_id, 
-    o.status_id as order_status, 
-    p.status_id as payment_status, 
-    s.status_id as shipment_status
-FROM order_header o
-INNER JOIN order_payment_preference p ON o.order_id = p.order_id
-LEFT JOIN shipment s ON o.order_id = s.primary_order_id
-WHERE p.status_id NOT IN ('PAYMENT_RECEIVED','PAYMENT_SETTLED')
-    AND s.status_id <> 'SHIPMENT_SHIPPED';
+SELECT
+    O.ORDER_ID,
+    O.STATUS_ID AS ORDER_STATUS,
+    P.STATUS_ID AS PAYMENT_STATUS,
+    S.STATUS_ID AS SHIPMENT_STATUS
+FROM ORDER_HEADER O
+JOIN ORDER_PAYMENT_PREFERENCE P
+    ON P.ORDER_ID = O.ORDER_ID
+LEFT JOIN SHIPMENT S
+    ON S.PRIMARY_ORDER_ID = O.ORDER_ID
+WHERE P.STATUS_ID NOT IN ('PAYMENT_RECEIVED', 'PAYMENT_SETTLED')
+  AND (S.STATUS_ID IS NULL OR S.STATUS_ID <> 'SHIPMENT_SHIPPED');
 ```
 
 **Output:**
@@ -322,12 +325,17 @@ HOUR
 
 ```
 SELECT
-	count(o.order_id) as total_order,
-	hour(o.STATUS_DATETIME) as hour
-from order_status o
-where o.STATUS_DATETIME  between '2024-10-28 00:00:01' and '2024-10-28 23:59:59'
-and o.status_id = 'ORDER_COMPLETED'
-group by hour order by hour;
+	COUNT(O.ORDER_ID) AS TOTAL_ORDER,
+	HOUR(O.STATUS_DATETIME) AS HOUR
+FROM
+	ORDER_STATUS O
+WHERE
+	O.STATUS_DATETIME
+		BETWEEN '2024-10-28 00:00:01'
+			AND '2024-10-28 23:59:59'
+	AND O.STATUS_ID = 'ORDER_COMPLETED'
+GROUP BY HOUR
+ORDER BY HOUR;
 ```
 
 **Output:**
