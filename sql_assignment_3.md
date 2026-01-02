@@ -3,6 +3,7 @@
 ---
 
 1. Completed Sales Orders (Physical Items)
+
 Business Problem:
 Merchants need to track only physical items (requiring shipping and fulfillment) for logistics and shipping-cost analysis.
 
@@ -55,6 +56,7 @@ AND o.status_id = 'ORDER_COMPLETED' AND o.order_type_id = 'SALES_ORDER';
 ------------------------------------------------------------------------------
 
 2. Completed Return Items
+
 Business Problem:
 Customer service and finance often need insights into returned items to manage refunds, replacements, and inventory restocking.
 
@@ -101,6 +103,7 @@ where ri.status_id='RETURN_COMPLETED';
 ------------------------------------------------------------------------------
 
 3. Single-Return Orders (Last Month)
+
 Business Problem:
 The mechandising team needs a list of orders that only have one return.
 
@@ -134,6 +137,7 @@ HAVING COUNT(rh.return_id) = 1;
 ------------------------------------------------------------------------------
 
 4. Returns and Appeasements
+
 Business Problem:
 The retailer needs the total amount of items, were returned as well as how many appeasements were issued.
 
@@ -169,6 +173,7 @@ where RETURN_ADJUSTMENT_TYPE_ID="APPEASEMENT";
 ------------------------------------------------------------------------------
 
 5. Detailed Return Information
+
 Business Problem:
 Certain teams need granular return data (reason, date, refund amount) for analyzing return rates, identifying recurring issues, or updating policies.
 
@@ -210,6 +215,7 @@ join order_header oh on oh.order_id=ri.order_id;
 ------------------------------------------------------------------------------
 
 6. Orders with Multiple Returns
+
 Business Problem:
 Analyzing orders with multiple returns can identify potential fraud, chronic issues with certain items, or inconsistent shipping processes.
 
@@ -246,6 +252,7 @@ GROUP BY order_id HAVING COUNT(DISTINCT return_id) > 1);
 ------------------------------------------------------------------------------
 
 7. Store with Most One-Day Shipped Orders (Last Month)
+
 Business Problem:
 Identify which facility (store) handled the highest volume of “one-day shipping” orders in the previous month, useful for operational benchmarking.
 
@@ -286,6 +293,7 @@ order by TOTAL_ONE_DAY_SHIP_ORDERS desc;
 ------------------------------------------------------------------------------
 
 8. List of Warehouse Pickers
+
 Business Problem:
 Warehouse managers need a list of employees responsible for picking and packing orders to manage shifts, productivity, and training needs.
 
@@ -322,6 +330,7 @@ where p.STATUS_ID is not null;
 ------------------------------------------------------------------------------
 
 9. Total Facilities That Sell the Product
+
 Business Problem:
 Retailers want to see how many (and which) facilities (stores, warehouses, virtual sites) currently offer a product for sale.
 
@@ -354,6 +363,7 @@ AND p.PRODUCT_ID = '21127' group by p.product_id;
 ------------------------------------------------------------------------------
 
 10. Total Items in Various Virtual Facilities
+
 Business Problem:
 Retailers need to study the relation of inventory levels of products to the type of facility it's stored at. Retrieve all inventory levels for products at locations and include the facility type Id. Do not retrieve facilities that are of type Virtual.
 
@@ -391,6 +401,7 @@ AND ii.quantity_on_hand_total > 0 AND ii.available_to_promise_total > 0;
 ------------------------------------------------------------------------------
 
 11. Transfer Orders Without Inventory Reservation
+
 Business Problem:
 When transferring stock between facilities, the system should reserve inventory. If it isn’t reserved, the transfer may fail or oversell.
 
@@ -435,6 +446,7 @@ WHERE oisgir.inventory_item_id IS NULL;
 ------------------------------------------------------------------------------
 
 12 Orders Without Picklist
+
 Business Problem:
 A picklist is necessary for warehouse staff to gather items. Orders missing a picklist might be delayed and need attention.
 
