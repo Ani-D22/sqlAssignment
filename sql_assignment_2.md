@@ -3,6 +3,7 @@
 ---
 
 5.1. Shipping Addresses for October 2023 Orders
+
 Business Problem:
 Customer Service might need to verify addresses for orders placed or completed in October 2023. This helps ensure shipments are delivered correctly and prevents address-related issues.
 
@@ -51,6 +52,7 @@ and ocm.CONTACT_MECH_PURPOSE_TYPE_ID='SHIPPING_LOCATION';
 -------------------------------------------------------------------------------------------
 
 5.2. Orders from New York
+
 Business Problem:
 Companies often want region-specific analysis to plan local marketing, staffing, or promotions in certain areas—here, specifically, New York.
 
@@ -97,6 +99,7 @@ where pa.state_province_geo_id='NY' and pa.city='New York';
 
 
 5.3. Top-Selling Product in New York
+
 Business Problem:
 Merchandising teams need to identify the best-selling product(s) in a specific region (New York) for targeted restocking or promotions.
 
@@ -137,6 +140,7 @@ order by revenue desc;
 -------------------------------------------------------------------------------------------
 
 7.3. Store-Specific (Facility-Wise) Revenue
+
 Business Problem:
 Different physical or online stores (facilities) may have varying levels of performance. The business wants to compare revenue across facilities for sales planning and budgeting.
 
@@ -177,6 +181,7 @@ order by total_revenue desc;
 
 
 8.1. Lost and Damaged Inventory
+
 Business Problem:
 Warehouse managers need to track “shrinkage” such as lost or damaged inventory to reconcile physical vs. system counts.
 
@@ -214,6 +219,7 @@ where iiv.variance_reason_id IN ('DAMAGED', 'VAR_LOST', 'VAR_DAMAGED');
 -------------------------------------------------------------------------------------------
 
 8.2 Low Stock or Out of Stock Items Report
+
 Business Problem:
 Avoiding out-of-stock situations is critical. This report flags items that have fallen below a certain reorder threshold or have zero available stock.
 
@@ -257,6 +263,7 @@ OR ii.AVAILABLE_TO_PROMISE_TOTAL = 0;
 -------------------------------------------------------------------------------------------
 
 8.3. Retrieve the Current Facility (Physical or Virtual) of Open Orders
+
 Business Problem:
 The business wants to know where open orders are currently assigned, whether in a physical store or a virtual facility (e.g., a distribution center or online fulfillment location).
 
@@ -293,6 +300,7 @@ where o.status_id IN ('ORDER_APPROVED','ORDER_CREATED');
 -------------------------------------------------------------------------------------------
 
 8.4. Items Where QOH and ATP Differ
+
 Business Problem:
 Sometimes the Quantity on Hand (QOH) doesn’t match the Available to Promise (ATP) due to pending orders, reservations, or data discrepancies. This needs review for accurate fulfillment planning.
 
@@ -328,6 +336,7 @@ WHERE QUANTITY_ON_HAND_TOTAL <> AVAILABLE_TO_PROMISE_TOTAL;
 -------------------------------------------------------------------------------------------
 
 8.5. Order Item Current Status Changed Date-Time
+
 Business Problem:
 Operations teams need to audit when an order item’s status (e.g., from “Pending” to “Shipped”) was last changed, for shipment tracking or dispute resolution.
 
@@ -367,6 +376,7 @@ AND os.STATUS_DATETIME < os2.STATUS_DATETIME;
 
 
 8.6. Total Orders by Sales Channel
+
 Business Problem:
 Marketing and sales teams want to see how many orders come from each channel (e.g., web, mobile app, in-store POS, marketplace) to allocate resources effectively.
 
